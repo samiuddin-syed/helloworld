@@ -1,20 +1,41 @@
 pipeline {
     agent any
+    options {
+        skipDefaultCheckout true
+    }
 
     stages {
+        stage('Clone Repository') {
+            steps {
+                git branch: "${env.BRANCH_NAME}", url: "${env.REPO_URL}"
+            }
+        }
+
         stage('Build') {
             steps {
-                echo 'Building..'
+                sh './gradlew build'
             }
         }
+
         stage('Test') {
             steps {
-                echo 'Testing..'
+                sh './gradlew test'
             }
         }
+
         stage('Deploy') {
             steps {
-                echo 'Deploying....'
+                sh './deploy.sh'
+            }
+        }
+    }
+
+    post {
+        always {
+            githubStatus context: 'continuous-integration/jenkins', state: 'success'
+            if (env.CHANGE_ID) {
+                githubComment message: "The pipeline completed successfully!"
+                githubLabel labels: ['approved']
             }
         }
     }
