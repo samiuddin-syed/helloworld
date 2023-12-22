@@ -1,35 +1,15 @@
 pipeline {
     agent any
-    options {
-        skipDefaultCheckout true
-    }
-
     stages {
-        stage('Clone Repository') {
-            steps {
-                git branch: "${env.BRANCH_NAME}", url: "${env.REPO_URL}"
-            }
-        }
-
         stage('Build') {
             steps {
-                sh './gradlew build'
-            }
-        }
-
-        stage('Test') {
-            steps {
-                sh './gradlew test'
-            }
-        }
-
-        stage('Deploy') {
-            steps {
-                sh './deploy.sh'
+                // Get some code from a GitHub repository
+                git url: 'https://github.com/naiveskill/devops.git', branch: 'main'
+                // Change file permisson
+                sh "chmod +x -R ./jenkins"
+                // Run shell script
+                sh "./jenkins/script/scripted_pipeline_ex_2.sh"
             }
         }
     }
-
 }
-
-
